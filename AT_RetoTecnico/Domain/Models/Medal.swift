@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Medal: Identifiable, Equatable {
+struct Medal: Codable, Identifiable, Equatable {
     let id: String
     let name: String
     let description: String

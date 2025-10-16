@@ -25,6 +25,10 @@ struct Medal: Codable, Identifiable, Equatable {
     var isLocked: Bool
     let animationType: String
     
+    enum CodingKeys: String, CodingKey {
+        case id, name, description, icon, category, rarity, backgroundColor, progressColor, level, points, maxLevel, reward, unlockedAt, nextLevelGoal, isLocked, animationType
+    }
+    
     static func == (lhs: Medal, rhs: Medal) -> Bool {
         return lhs.id == rhs.id &&  // ¿Medalla?
         lhs.level == rhs.level &&   // ¿Nivel?

@@ -1,5 +1,5 @@
 //
-//  StartPointsEngineUseCase.swift
+//  StopPointsEngineUseCase.swift
 //  AT_RetoTecnico
 //
 //  Created by Kevin Candia Villagómez on 15/10/25.
@@ -7,14 +7,14 @@
 
 import Foundation
 
-final class StartPointsEngineUseCase {
+final class StopPointsEngineUseCase {
     private let repository: MedalsRepository
-    
+
     init(repository: MedalsRepository) {
         self.repository = repository
     }
-    
+
     func execute() {
-        repository.startEngine()
+        repository.stopEngine()
     }
 }

@@ -9,22 +9,21 @@ import Foundation
 import Combine
 import SwiftData
 
-class MedalsRepositoryImpl: MedalsRepository {
+final class MedalsRepositoryImpl: MedalsRepository {
+    
+    private let localDataSource: SwiftDataLocalDataSource
+    private let medalsSubject: CurrentValueSubject<[Medal], Error>
     
     private let modelContainer: ModelContainer
     
-    init() {
-        do {
-            self.modelContainer = try ModelContainer(for: MedalData.self)
-        } catch {
-            fatalError("Failed to initialize ModelContainer: \(error)")
-        }
+    init(localDataSource: SwiftDataLocalDataSource, medalsSubject: CurrentValueSubject<[Medal], Error>, modelContainer: ModelContainer) {
+        self.localDataSource = localDataSource
+        self.medalsSubject = medalsSubject
+        self.modelContainer = modelContainer
     }
     
-    func getMedals() -> AnyPublisher<[Medal], any Error> {
-        return Just(loadMedalsFromJSON())
-            .mapError { _ in fatalError("Error COntrolado") }
-            .eraseToAnyPublisher()
+    func getMedals() -> AnyPublisher<[Medal], Error> {
+        return medalsSubject.eraseToAnyPublisher()
     }
     
     func saveOrUpdate(medals: [Medal]) async throws {
@@ -32,11 +31,30 @@ class MedalsRepositoryImpl: MedalsRepository {
     }
     
     func resetMedals() async throws {
-        //TODO
+        try localDataSource.deleteAll() // Borramos e iniciamos de nuevo
+        try await initializeMedalsIfNeeded()
+        await loadInitialData() // LLenamos nuevamente
     }
     
     func initializeMedalsIfNeeded() async throws {
-        //TODO
+        if try localDataSource.isEmpty() {
+            let medalsFromJSON = loadMedalsFromJSON()
+            let medalEntities = medalsFromJSON.map { MedalMapper.toEntity(domain: $0) }
+            try localDataSource.insert(medals: medalEntities)
+        }
+    }
+    
+    private func loadInitialData() async {
+        do {
+            try await initializeMedalsIfNeeded()
+            let medalEntities = try localDataSource.fetchMedals()
+            // Mapeamos del modelo de datos al modelo de dominio.
+            let domainMedals = medalEntities.map { MedalMapper.toDomain(entity: $0) }
+            // Enviamos los datos actualizados a todos los suscriptores.
+            medalsSubject.send(domainMedals)
+        } catch {
+            medalsSubject.send(completion: .failure(error))
+        }
     }
     
     private func loadMedalsFromJSON() -> [Medal] {
@@ -50,10 +68,26 @@ class MedalsRepositoryImpl: MedalsRepository {
         
         do {
             let decoder = JSONDecoder()
+            // Usamos la key "description" del JSON y la mapeamos a nuestra propiedad `medalDescription`.
+            decoder.keyDecodingStrategy = .custom { keys in
+                let lastKey = keys.last!
+                if lastKey.stringValue == "description" {
+                    return AnyKey(stringValue: "medalDescription")!
+                } else {
+                    return lastKey
+                }
+            }
             let medals = try decoder.decode([Medal].self, from: data)
             return medals
         } catch {
-            fatalError("Failed to decode json: \(error)")
+            fatalError("Failed to decode medallas_mock.json: \(error)")
         }
+    }
+    
+    private struct AnyKey: CodingKey {
+        var stringValue: String
+        var intValue: Int?
+        init?(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { return nil }
     }
 }

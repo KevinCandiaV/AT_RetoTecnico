@@ -11,17 +11,18 @@ import SwiftData
 
 final class MedalsRepositoryImpl: MedalsRepository {
     
+    // MARK: - Propiedades Privadas
     private let localDataSource: SwiftDataLocalDataSource
     private let medalsSubject: CurrentValueSubject<[Medal], Error>
     
-    private let modelContainer: ModelContainer
-    
-    init(localDataSource: SwiftDataLocalDataSource, medalsSubject: CurrentValueSubject<[Medal], Error>, modelContainer: ModelContainer) {
+    // MARK: - Inicializador
+    init(localDataSource: SwiftDataLocalDataSource) {
         self.localDataSource = localDataSource
-        self.medalsSubject = medalsSubject
-        self.modelContainer = modelContainer
+        self.medalsSubject = CurrentValueSubject([])
+        Task { await loadInitialData() }
     }
     
+    // MARK: - Métodos del Protocolo
     func getMedals() -> AnyPublisher<[Medal], Error> {
         return medalsSubject.eraseToAnyPublisher()
     }

@@ -10,11 +10,15 @@ import SwiftData
 
 @main
 struct AT_RetoTecnicoApp: App {
-    let container: ModelContainer // Contenedor del modelo
+    
+    private let injector: DependencyInjector
+    private let container: ModelContainer // Contenedor del modelo
     
     init() {
         do {
-            container = try ModelContainer(for: MedalData.self)
+            let modelContainer = try ModelContainer(for: MedalData.self)
+                        self.container = modelContainer
+                        self.injector = DependencyInjector(modelContainer: modelContainer)
         } catch {
             fatalError("Error en crear el modelo")
         }
@@ -22,7 +26,7 @@ struct AT_RetoTecnicoApp: App {
     
     var body: some Scene {
         WindowGroup {
-            Text("demo")
+            ProfileView(viewModel: injector.makeProfileViewModel())
         }
         .modelContainer(container)
     }

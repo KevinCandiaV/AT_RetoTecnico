@@ -10,22 +10,9 @@
 		0AC58A952E9F733E00887860 /* AT_RetoTecnico.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AT_RetoTecnico.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0ADF7E2E2E9F7A3C008E8FAB /* Exceptions for "AT_RetoTecnico" folder in "AT_RetoTecnico" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Domain/UseCases/StartPointsEngineUseCase.swift,
-			);
-			target = 0AC58A942E9F733E00887860 /* AT_RetoTecnico */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0AC58A972E9F733E00887860 /* AT_RetoTecnico */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				0ADF7E2E2E9F7A3C008E8FAB /* Exceptions for "AT_RetoTecnico" folder in "AT_RetoTecnico" target */,
-			);
 			path = AT_RetoTecnico;
 			sourceTree = "<group>";
 		};

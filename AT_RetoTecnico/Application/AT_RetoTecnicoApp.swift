@@ -18,7 +18,7 @@ struct AT_RetoTecnicoApp: App {
         do {
             let modelContainer = try ModelContainer(for: MedalData.self)
                         self.container = modelContainer
-                        self.injector = DependencyInjector(modelContainer: modelContainer)
+            self.injector = DependencyInjector(modelContainer: modelContainer)
         } catch {
             fatalError("Error en crear el modelo")
         }

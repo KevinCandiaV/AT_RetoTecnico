@@ -13,4 +13,8 @@ protocol MedalsRepository {
     func saveOrUpdate(medals: [Medal]) async throws
     func resetMedals() async throws
     func initializeMedalsIfNeeded() async throws
+    
+    //MARK: - Nuevo
+    func startEngine() // Inicia el proceso de ganar puntos.
+    func stopEngine()  // Detiene el proceso.
 }

@@ -17,12 +17,28 @@ final class ProfileViewModel: ObservableObject {
     
     // MARK: - Dependencias
     private let getMedalsUseCase: GetMedalsUseCase
+    private let startPointsEngineUseCase: StartPointsEngineUseCase
+    private let stopPointsEngineUseCase: StopPointsEngineUseCase
+    
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Init
-    init(getMedalsUseCase: GetMedalsUseCase) {
+    init(getMedalsUseCase: GetMedalsUseCase,
+         startPointsEngineUseCase: StartPointsEngineUseCase,
+         stopPointsEngineUseCase: StopPointsEngineUseCase) {
         self.getMedalsUseCase = getMedalsUseCase
+        self.startPointsEngineUseCase = startPointsEngineUseCase
+        self.stopPointsEngineUseCase = stopPointsEngineUseCase
+        
         bindMedals()
+    }
+    
+    func onAppear() {
+        startPointsEngineUseCase.execute()
+    }
+    
+    func onDisappear() {
+        stopPointsEngineUseCase.execute()
     }
     
     // MARK: - Métodos Privados

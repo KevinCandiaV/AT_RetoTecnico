@@ -18,6 +18,10 @@ actor PointsEngine {
     func setMedals(_ medals: [Medal]) {
         self.currentMedals = medals
     }
+    
+    func updateMedals(_ medals: [Medal]) {
+        self.currentMedals = medals
+    }
 
     func start() {
         guard pointIncrementTask == nil else { return }
@@ -25,7 +29,7 @@ actor PointsEngine {
         pointIncrementTask = Task {
             while !Task.isCancelled {
 //                try await Task.sleep(for: .seconds(.random(in: 1...3)))
-                try await Task.sleep(for: .seconds(1))
+                try await Task.sleep(for: .seconds(2))
                 incrementRandomMedalPoints() // incremento de puntos
                 onUpdate?(currentMedals) // notifica los nuevos datos
             }

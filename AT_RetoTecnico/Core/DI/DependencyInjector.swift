@@ -40,6 +40,10 @@ final class DependencyInjector {
         StopPointsEngineUseCase(repository: medalsRepository)
     }()
     
+    private lazy var resetProgressUseCase: ResetProgressUseCase = {
+        ResetProgressUseCase(repository: medalsRepository)
+    }()
+    
     // MARK: - Inicializador
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
@@ -47,11 +51,11 @@ final class DependencyInjector {
     
     // MARK: - Fábrica de ViewModels
     func makeProfileViewModel() -> ProfileViewModel {
-            // Le pasamos los nuevos casos de uso al ViewModel.
-            return ProfileViewModel(
-                getMedalsUseCase: getMedalsUseCase,
-                startPointsEngineUseCase: startPointsEngineUseCase,
-                stopPointsEngineUseCase: stopPointsEngineUseCase
-            )
-        }
+        return ProfileViewModel(
+            getMedalsUseCase: getMedalsUseCase,
+            startPointsEngineUseCase: startPointsEngineUseCase,
+            stopPointsEngineUseCase: stopPointsEngineUseCase,
+            resetProgressUseCase: resetProgressUseCase
+        )
+    }
 }

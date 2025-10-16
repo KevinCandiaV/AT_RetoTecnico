@@ -18,14 +18,14 @@ final class MedalsRepositoryImpl: MedalsRepository {
     
     // MARK: - Inicializador
     init(localDataSource: SwiftDataLocalDataSource, pointsEngine: PointsEngine) {
-            self.localDataSource = localDataSource
-            self.pointsEngine = pointsEngine
-            self.medalsSubject = CurrentValueSubject([])
-            self.pointsEngine.onUpdate = { [weak self] updatedMedals in
-                self?.handleEngineUpdate(medals: updatedMedals)
-            }
-            Task { await loadInitialData() }
+        self.localDataSource = localDataSource
+        self.pointsEngine = pointsEngine
+        self.medalsSubject = CurrentValueSubject([])
+        self.pointsEngine.onUpdate = { [weak self] updatedMedals in
+            self?.handleEngineUpdate(medals: updatedMedals)
         }
+        Task { await loadInitialData() }
+    }
     
     // MARK: - Métodos del Protocolo
     func getMedals() -> AnyPublisher<[Medal], Error> {
@@ -34,12 +34,6 @@ final class MedalsRepositoryImpl: MedalsRepository {
     
     func saveOrUpdate(medals: [Medal]) async throws {
         //TODO
-    }
-    
-    func resetMedals() async throws {
-        try localDataSource.deleteAll() // Borramos e iniciamos de nuevo
-        try await initializeMedalsIfNeeded()
-        await loadInitialData() // LLenamos nuevamente
     }
     
     func initializeMedalsIfNeeded() async throws {
@@ -91,7 +85,7 @@ final class MedalsRepositoryImpl: MedalsRepository {
     //MARK: - New methods
     func startEngine() {
         Task {
-            await pointsEngine.setMedals(medalsSubject.value)
+            await pointsEngine.updateMedals(medalsSubject.value)
             await pointsEngine.start()
         }
     }
@@ -100,6 +94,16 @@ final class MedalsRepositoryImpl: MedalsRepository {
         Task {
             await pointsEngine.stop()
         }
+    }
+    
+    func resetMedals() async throws {
+        await pointsEngine.stop()
+        try localDataSource.deleteAll()
+        try await initializeMedalsIfNeeded()
+        let freshMedals = try localDataSource.fetchMedals().map { MedalMapper.toDomain(entity: $0) }
+        medalsSubject.send(freshMedals)
+        await pointsEngine.updateMedals(freshMedals)
+        await pointsEngine.start()
     }
     
     private func handleEngineUpdate(medals: [Medal]) {

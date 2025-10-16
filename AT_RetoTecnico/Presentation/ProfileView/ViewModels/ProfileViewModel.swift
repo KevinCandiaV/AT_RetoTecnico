@@ -22,14 +22,18 @@ final class ProfileViewModel: ObservableObject {
     
     private var cancellables = Set<AnyCancellable>()
     
+    private let resetProgressUseCase: ResetProgressUseCase
+    private var avatarTapCount = 0
+    
     // MARK: - Init
     init(getMedalsUseCase: GetMedalsUseCase,
          startPointsEngineUseCase: StartPointsEngineUseCase,
-         stopPointsEngineUseCase: StopPointsEngineUseCase) {
+         stopPointsEngineUseCase: StopPointsEngineUseCase,
+         resetProgressUseCase: ResetProgressUseCase) {
         self.getMedalsUseCase = getMedalsUseCase
         self.startPointsEngineUseCase = startPointsEngineUseCase
         self.stopPointsEngineUseCase = stopPointsEngineUseCase
-        
+        self.resetProgressUseCase = resetProgressUseCase
         bindMedals()
     }
     
@@ -53,5 +57,22 @@ final class ProfileViewModel: ObservableObject {
                 self?.medals = medals
             })
             .store(in: &cancellables)
+    }
+    
+    func avatarTapped() {
+        avatarTapCount += 1
+        if avatarTapCount >= 5 {
+            Task {
+                stopPointsEngineUseCase.execute()
+                do {
+                    try await resetProgressUseCase.execute()
+                    avatarTapCount = 0
+                } catch {
+                    errorMessage = "Error al reiniciar el progreso: \(error.localizedDescription)"
+                    avatarTapCount = 0
+                    startPointsEngineUseCase.execute()
+                }
+            }
+        }
     }
 }

@@ -15,6 +15,8 @@ final class ProfileViewModel: ObservableObject {
     @Published var medals: [Medal] = []
     @Published var errorMessage: String?
     
+    @Published var leveledUpMedal: Medal?
+    
     // MARK: - Dependencias
     private let getMedalsUseCase: GetMedalsUseCase
     private let startPointsEngineUseCase: StartPointsEngineUseCase
@@ -49,6 +51,10 @@ final class ProfileViewModel: ObservableObject {
     private func bindMedals() {
         getMedalsUseCase.execute()
             .receive(on: DispatchQueue.main) // Actualiza la ui en el hilo principal
+            .scan([], { previousMedals, newMedals in
+                self.detectLevelUp(from: previousMedals, to: newMedals)
+                return newMedals
+            })
             .sink(receiveCompletion: { [weak self] completion in
                 if case .failure(let error) = completion {
                     self?.errorMessage = "Error al cargar medallas: \(error.localizedDescription)"
@@ -74,5 +80,27 @@ final class ProfileViewModel: ObservableObject {
                 }
             }
         }
+    }
+    
+    private func detectLevelUp(from oldMedals: [Medal], to newMedals: [Medal]) {
+        // Si la lista vieja está vacía, es la primera carga, así que no hay subida de nivel.
+        guard !oldMedals.isEmpty else { return }
+        
+        for newMedal in newMedals {
+            // Buscamos la medalla correspondiente en la lista vieja.
+            if let oldMedal = oldMedals.first(where: { $0.id == newMedal.id }) {
+                // Si el nivel de la nueva es mayor que el de la vieja, ¡hemos encontrado una!
+                if newMedal.level > oldMedal.level {
+                    print("¡Subida de nivel detectada para: \(newMedal.name)!")
+                    // Publicamos la medalla para que la vista la muestre.
+                    leveledUpMedal = newMedal
+                    return // Solo manejamos una subida de nivel a la vez.
+                }
+            }
+        }
+    }
+    
+    func animationDidFinish() {
+        leveledUpMedal = nil
     }
 }

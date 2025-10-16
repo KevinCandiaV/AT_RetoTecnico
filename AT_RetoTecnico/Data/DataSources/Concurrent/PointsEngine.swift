@@ -28,8 +28,7 @@ actor PointsEngine {
         
         pointIncrementTask = Task {
             while !Task.isCancelled {
-//                try await Task.sleep(for: .seconds(.random(in: 1...3)))
-                try await Task.sleep(for: .seconds(2))
+                try await Task.sleep(for: .seconds(.random(in: 1...3)))
                 incrementRandomMedalPoints() // incremento de puntos
                 onUpdate?(currentMedals) // notifica los nuevos datos
             }
@@ -51,7 +50,7 @@ actor PointsEngine {
         }
         
         // Incrementa los puntos de forma aleatoria (ej. entre 1 y 100).
-        currentMedals[index].points += Int.random(in: 1...100)
+        currentMedals[index].points += Int.random(in: 5...15)
         
         // Comprueba si la medalla sube de nivel.
         if currentMedals[index].points >= 100 {

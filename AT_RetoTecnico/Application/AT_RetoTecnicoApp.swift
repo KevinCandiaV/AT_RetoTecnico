@@ -10,22 +10,20 @@ import SwiftData
 
 @main
 struct AT_RetoTecnicoApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+    let container: ModelContainer // Contenedor del modelo
+    
+    init() {
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            container = try ModelContainer(for: MedalData.self)
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            fatalError("Error en crear el modelo")
         }
-    }()
-
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Text("demo")
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(container)
     }
 }

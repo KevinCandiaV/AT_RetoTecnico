@@ -14,55 +14,64 @@ struct ProfileView: View {
     @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
-        NavigationView {
-            Form {
-                // MARK: - Sección del Avatar
-                Section {
-                    HStack {
-                        Spacer()
-                        VStack {
-                            Image(systemName: "person.crop.circle.fill")
-                                .font(.system(size: 80))
-                                .foregroundColor(.gray)
-                                .onTapGesture {
-                                    viewModel.avatarTapped()
-                                }
-                            
-                            Text("Toca 5 veces para reiniciar")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+        ZStack {
+            NavigationView {
+                Form {
+                    // MARK: - Sección del Avatar
+                    Section {
+                        HStack {
+                            Spacer()
+                            VStack {
+                                Image(systemName: "person.crop.circle.fill")
+                                    .font(.system(size: 80))
+                                    .foregroundColor(.gray)
+                                    .onTapGesture {
+                                        viewModel.avatarTapped()
+                                    }
+                                
+                                Text("Toca 5 veces para reiniciar")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
                         }
-                        Spacer()
+                        .padding(.vertical)
+                        // Elimina el fondo de la celda para que se integre mejor.
+                        .listRowBackground(Color.clear)
                     }
-                    .padding(.vertical)
-                    // Elimina el fondo de la celda para que se integre mejor.
-                    .listRowBackground(Color.clear)
+                    
+                    // MARK: - Sección de Medallas
+                    Section(header: Text("Medallas")) {
+                        ForEach(viewModel.medals) { medal in
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(medal.name)
+                                    .font(.headline)
+                                
+                                Text(medal.description)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                
+                                ProgressView(value: Float(medal.points), total: 100)
+                                    .tint(Color(hex: medal.progressColor))
+                                
+                                Text("NIVEL: \(medal.level)  |  Puntos: \(medal.points)/100")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 8)
+                            .listRowBackground(Color(hex: medal.backgroundColor).opacity(0.4))
+                        }
+                    }
                 }
-                
-                // MARK: - Sección de Medallas
-                Section(header: Text("Medallas")) {
-                    ForEach(viewModel.medals) { medal in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(medal.name)
-                                .font(.headline)
-                            
-                            Text(medal.description)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                            
-                            ProgressView(value: Float(medal.points), total: 100)
-                                .tint(Color(hex: medal.progressColor))
-                            
-                            Text("NIVEL: \(medal.level)  |  Puntos: \(medal.points)/100")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.vertical, 8)
-                        .listRowBackground(Color(hex: medal.backgroundColor).opacity(0.4))
-                    }
+                .navigationTitle("Perfil de Usuario")
+            }
+            
+            if let medal = viewModel.leveledUpMedal {
+                ConfettiAnimationView(medal: medal) {
+                    // Cuando la animación termina, llamamos a este método del ViewModel.
+                    viewModel.animationDidFinish()
                 }
             }
-            .navigationTitle("Perfil de Usuario")
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .active {
